@@ -13,14 +13,29 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreatePerson godoc
+// @Summary Создание нового человека
+// @Description Создаёт нового человека с обогащением данных
+// @Tags person
+// @Accept json
+// @Produce json
+// @Param person body models.CreatePersonRequest true "Данные нового человека (имя и фамилия обязательны)"
+// @Success 201 {object} models.Person "Пользователь успешно создан"
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /people [post]
 func CreatePerson(c *gin.Context) {
-	var person models.Person
-	err := c.ShouldBindJSON(&person)
+	var personRequest models.Person
+	err := c.ShouldBindJSON(&personRequest)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	log.Printf("Обогащение данных для имени %s", person.Name)
+	log.Printf("Обогащение данных для имени %s", personRequest.Name)
+	var person models.Person
+	person.Name = personRequest.Name
+	person.Surname = personRequest.Surname
+	person.Patronymic = personRequest.Patronymic
 	person.Age = services.GetAge(person.Name)
 	person.Gender = services.GetGender(person.Name)
 	person.Nationality = services.GetNationality(person.Name)
@@ -33,6 +48,16 @@ func CreatePerson(c *gin.Context) {
 
 }
 
+// DeletePerson godoc
+// @Summary Удаление пользователя
+// @Description Удаляет пользователя по id
+// @Tags person
+// @Produce json
+// @Param id path int true "ID пользователя"
+// @Success 200 {object} models.ErrorResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /people/{id} [delete]
 func DeletePerson(c *gin.Context) {
 	var person models.Person
 	strId := c.Param("id")
@@ -55,6 +80,18 @@ func DeletePerson(c *gin.Context) {
 
 }
 
+// UpdatePerson godoc
+// @Summary Обновление данных пользователя
+// @Description Обновляет данные пользователя по id
+// @Tags person
+// @Accept json
+// @Param id path string true "ID пользователя"
+// @Param input body models.Person false "Данные для обновления"
+// @Produce json
+// @Success 200 {object} models.Person "Обновленные данные пользователя"
+// @Failrue 404 {object} models.ErrorResponse
+// @Failrue 500 {object} models.ErrorResponse
+// @Router /people/{id} [put]
 func UpdatePerson(c *gin.Context) {
 	id := c.Param("id")
 	var person models.Person
@@ -100,6 +137,22 @@ func UpdatePerson(c *gin.Context) {
 
 }
 
+// GetPersons godoc
+// @Summary Возращает список пользователей
+// @Description Возращает список пользователей, c возможностью фильтрации по имени,фамилии возрасту,и полу,также с пагинацией
+// @Tags person
+// @Produce json
+// @Param name query string false "Фильтр по имени"
+// @Param surname query string false "Фильтр по фамилии"
+// @Param gender query string false "Фильтр по полу"
+// @Param age query integer false "Фильтр по точному возрасту"
+// @Param age_min query integer false "Минимальный возраст (включительно)"
+// @Param age_max query integer false "Максимальный возраст (включительно)"
+// @Param limit query integer false "Лимит записей (по умолчанию 10)"
+// @Param offset query integer false "Смещение (по умолчанию 0)"
+// @Success 200  {array} models.Person "Cписок людей"
+// @Failrue 500 {object} models.ErrorResponse "Ошибка сервера"
+// @Router /people [get]
 func GetPersons(c *gin.Context) {
 
 	var persons []models.Person
@@ -137,6 +190,16 @@ func GetPersons(c *gin.Context) {
 
 	c.JSON(http.StatusOK, persons)
 }
+
+// GetPersonByID godoc
+// @Summary Возращает данные о пользователе
+// @Description Возращает данные пользователе по id
+// @Tags person
+// @Produce json
+// @Param id path string true "ID пользователя"
+// @Success 200 {object} models.Person"Данные о пользователе"
+// @Failrue 404 models.ErrorResponse "Пользователь не найден"
+// @Router /people/{id} [get]
 func GetPersonByID(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -146,7 +209,7 @@ func GetPersonByID(c *gin.Context) {
 	var person models.Person
 	if err := db.DB.First(&person, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Человек не найден"})
+			c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

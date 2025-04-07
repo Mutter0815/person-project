@@ -1,0 +1,199 @@
+basePath: /
+definitions:
+  models.CreatePersonRequest:
+    properties:
+      name:
+        example: Ivan
+        type: string
+      patronymic:
+        example: Ivanovich
+        type: string
+      surname:
+        example: Ivanov
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.Person:
+    properties:
+      age:
+        type: integer
+      created_at:
+        type: string
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+      updated_at:
+        type: string
+    required:
+    - name
+    - surname
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для создания и получения информации о людях
+  title: People API
+  version: "1.0"
+paths:
+  /people:
+    get:
+      description: Возращает список пользователей, c возможностью фильтрации по имени,фамилии
+        возрасту,и полу,также с пагинацией
+      parameters:
+      - description: Фильтр по имени
+        in: query
+        name: name
+        type: string
+      - description: Фильтр по фамилии
+        in: query
+        name: surname
+        type: string
+      - description: Фильтр по полу
+        in: query
+        name: gender
+        type: string
+      - description: Фильтр по точному возрасту
+        in: query
+        name: age
+        type: integer
+      - description: Минимальный возраст (включительно)
+        in: query
+        name: age_min
+        type: integer
+      - description: Максимальный возраст (включительно)
+        in: query
+        name: age_max
+        type: integer
+      - description: Лимит записей (по умолчанию 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение (по умолчанию 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cписок людей
+          schema:
+            items:
+              $ref: '#/definitions/models.Person'
+            type: array
+      summary: Возращает список пользователей
+      tags:
+      - person
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового человека с обогащением данных
+      parameters:
+      - description: Данные нового человека (имя и фамилия обязательны)
+        in: body
+        name: person
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePersonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно создан
+          schema:
+            $ref: '#/definitions/models.Person'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Создание нового человека
+      tags:
+      - person
+  /people/{id}:
+    delete:
+      description: Удаляет пользователя по id
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Удаление пользователя
+      tags:
+      - person
+    get:
+      description: Возращает данные пользователе по id
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные о пользователе
+          schema:
+            $ref: '#/definitions/models.Person'
+      summary: Возращает данные о пользователе
+      tags:
+      - person
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя по id
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: input
+        schema:
+          $ref: '#/definitions/models.Person'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленные данные пользователя
+          schema:
+            $ref: '#/definitions/models.Person'
+      summary: Обновление данных пользователя
+      tags:
+      - person
+swagger: "2.0"

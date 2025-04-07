@@ -1,0 +1,299 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для создания и получения информации о людях",
+        "title": "People API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/people": {
+            "get": {
+                "description": "Возращает список пользователей, c возможностью фильтрации по имени,фамилии возрасту,и полу,также с пагинацией",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "person"
+                ],
+                "summary": "Возращает список пользователей",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Фильтр по имени",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по фамилии",
+                        "name": "surname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр по полу",
+                        "name": "gender",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Фильтр по точному возрасту",
+                        "name": "age",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Минимальный возраст (включительно)",
+                        "name": "age_min",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Максимальный возраст (включительно)",
+                        "name": "age_max",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Лимит записей (по умолчанию 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Смещение (по умолчанию 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Cписок людей",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Person"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создаёт нового человека с обогащением данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "person"
+                ],
+                "summary": "Создание нового человека",
+                "parameters": [
+                    {
+                        "description": "Данные нового человека (имя и фамилия обязательны)",
+                        "name": "person",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreatePersonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Пользователь успешно создан",
+                        "schema": {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/{id}": {
+            "get": {
+                "description": "Возращает данные пользователе по id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "person"
+                ],
+                "summary": "Возращает данные о пользователе",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные о пользователе",
+                        "schema": {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновляет данные пользователя по id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "person"
+                ],
+                "summary": "Обновление данных пользователя",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления",
+                        "name": "input",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновленные данные пользователя",
+                        "schema": {
+                            "$ref": "#/definitions/models.Person"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет пользователя по id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "person"
+                ],
+                "summary": "Удаление пользователя",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.CreatePersonRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Ivan"
+                },
+                "patronymic": {
+                    "type": "string",
+                    "example": "Ivanovich"
+                },
+                "surname": {
+                    "type": "string",
+                    "example": "Ivanov"
+                }
+            }
+        },
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Person": {
+            "type": "object",
+            "required": [
+                "name",
+                "surname"
+            ],
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
