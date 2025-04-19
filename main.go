@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"person-project/config"
 	"person-project/db"
-	"person-project/handlers"
-
 	_ "person-project/docs"
+	"person-project/handlers"
+	"person-project/logger"
+	"person-project/middleware"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,17 +21,20 @@ import (
 // @BasePath /
 func main() {
 
+	config.LoadConfig()
+	logger.Init()
 	db.Connect()
 
 	db.Migrate()
 	r := gin.Default()
+	r.Use(middleware.LoggingMiddleware())
 
 	person := r.Group("/people")
 	{
 		person.POST("", handlers.CreatePerson)
 		person.GET("", handlers.GetPersons)
 		person.GET("/:id", handlers.GetPersonByID)
-		person.PUT("/:id", handlers.UpdatePerson)
+		person.PATCH("/:id", handlers.UpdatePerson)
 		person.DELETE("/:id", handlers.DeletePerson)
 	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

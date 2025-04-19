@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  models.CreatePersonRequest:
+  dto.CreatePersonRequest:
     properties:
       name:
         example: Ivan
@@ -12,9 +12,33 @@ definitions:
         example: Ivanov
         type: string
     type: object
-  models.ErrorResponse:
+  dto.ErrorResponse:
     properties:
       error:
+        type: string
+    type: object
+  dto.UpdatePersonRequest:
+    properties:
+      age:
+        example: 30
+        type: integer
+      gender:
+        enum:
+        - male
+        - female
+        example: male
+        type: string
+      name:
+        example: Ivan
+        type: string
+      nationality:
+        example: Russian
+        type: string
+      patronymic:
+        example: Ivanovich
+        type: string
+      surname:
+        example: Ivanov
         type: string
     type: object
   models.Person:
@@ -24,6 +48,9 @@ definitions:
       created_at:
         type: string
       gender:
+        enum:
+        - male
+        - female
         type: string
       id:
         type: integer
@@ -89,7 +116,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Cписок людей
+          description: Cписок пользователей
           schema:
             items:
               $ref: '#/definitions/models.Person'
@@ -107,7 +134,7 @@ paths:
         name: person
         required: true
         schema:
-          $ref: '#/definitions/models.CreatePersonRequest'
+          $ref: '#/definitions/dto.CreatePersonRequest'
       produces:
       - application/json
       responses:
@@ -118,11 +145,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Создание нового человека
       tags:
       - person
@@ -139,17 +166,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Успешное удаление пользователя
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/models.Person'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/dto.ErrorResponse'
       summary: Удаление пользователя
       tags:
       - person
@@ -171,7 +198,7 @@ paths:
       summary: Возращает данные о пользователе
       tags:
       - person
-    put:
+    patch:
       consumes:
       - application/json
       description: Обновляет данные пользователя по id
@@ -185,7 +212,7 @@ paths:
         in: body
         name: input
         schema:
-          $ref: '#/definitions/models.Person'
+          $ref: '#/definitions/dto.UpdatePersonRequest'
       produces:
       - application/json
       responses:

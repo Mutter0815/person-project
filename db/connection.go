@@ -3,9 +3,8 @@ package db
 import (
 	"fmt"
 	"log"
-	"os"
+	"person-project/config"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,20 +12,14 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Ошибка загрузки .env файла:", err)
-	}
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	host := os.Getenv("DB_HOST")
-	dbname := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s  sslmode=disable", host, port, user, password, dbname)
+	cfg := config.Cfg
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s  sslmode=disable", config.Cfg.DB.Host, config.Cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
+	var err error
 	DB, err = gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Ошибка подключения данных", err)
+		log.Fatalf("Ошибка подключения к базе данных %v", err)
 	}
-	log.Println("Успешное подключение базы данных")
+
+	log.Println("Успешное подключение к базе данных")
 }
